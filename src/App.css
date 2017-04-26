@@ -1,0 +1,352 @@
+body {
+	font: 14px "Century Gothic", Futura, sans-serif;
+	margin: 0;
+	overflow-x: hidden;
+	text-align: center;
+}
+
+*, *::after, *::before {
+	box-sizing: border-box;
+}
+
+h1 {
+    text-transform: uppercase;
+    font-size: 5vh;
+}
+
+.gameSelection {
+	margin: 0;
+	padding: 0;
+	display: flex;
+	flex-direction: column;
+}
+
+.gameSelection li {
+	position: relative;
+}
+
+.gameLevelSelection { 
+    position: absolute;
+    top: 0;
+    left: 0;
+    margin: 2%;
+    width: 96%;
+    height: 20vh;
+	z-index: 1;
+	background: rgba(0,0,0,.5);
+	display: flex;
+	justify-content: center;
+	align-items: center;
+}
+
+.gameLevelSelection button {
+    background: none;
+    border: 0;
+    outline: none;
+    padding: 0;
+    font-size: 4vh;
+    color: white;
+    text-transform: uppercase;
+    font-weight: bold;
+    font-family: inherit;
+    line-height: 1.2;
+	transition: color .3s ease;
+	margin: 0 3vw;
+}
+
+.gameLevelSelection button:hover {
+	color: gold;
+}
+
+.gameLevelSelection button::before {
+	display: block;
+    font-family: FontAwesome;
+    font-size: 10vh;
+}
+
+.selectGame {
+	background: #fff;
+	border: 1px solid #999;
+	margin: 2%;
+    width: 96%;
+	font-weight: bold;  
+	padding: 0;
+	text-align: center; 
+	position: relative;
+    min-height: 20vh;
+    overflow: hidden;
+}
+
+.selectGame:focus {
+  outline: none;
+}
+
+.selectGame span {
+	position: absolute; 
+	z-index: 1; 
+	margin: auto;
+	left: 0; 
+	
+    font-size: 6vh;
+    bottom: 10%; 
+    padding: 0 3vw;
+	color: gold;
+    text-shadow: black 1px 1px 4px;
+}
+
+.selectGame img {
+	position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    margin: auto;
+	width: 100%;
+}
+
+.game {
+	display: flex;
+	flex-direction: row;
+	height: 100vh;
+}
+
+.game > div {
+	flex-grow: 1;
+}
+
+.topBar {
+	height: 8vh;
+	display: flex;
+    justify-content: space-between;
+    align-items: center;
+  	border-bottom: 1px solid #999;
+	color: white;
+	background: #333;
+}
+
+.topBar .pause {
+	color: inherit;
+    height: 8vh;
+    font-size: 0;
+    padding: 0 2.5vw;
+    background: none;
+    border: 0;
+    outline: none;
+}
+
+.topBar .pause::before {
+	font-size: 5vh;
+}
+
+.timer {
+    justify-content: flex-end;
+    align-items: center;
+    flex-grow: 1;
+    display: flex;
+}
+
+.timer span {
+	font-size: 5vh;
+	padding: 0 2.5vw;
+}
+
+.pauseMenu + .topBar * { opacity:  .5; }
+
+.pauseMenu {
+    display: flex;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    padding: 0 10vw;
+    justify-content: space-around;
+    align-items: center;
+    z-index: 10;
+	background: rgba(0,0,0,.5);
+}
+
+.pauseMenu button.close {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 8vh;
+    padding: 0 2.5vw;
+}
+
+.pauseMenu button.close::before {
+    font-size: 5vh;
+}
+
+.pauseMenu button {
+    background: none;
+    border: 0;
+    outline: none;
+    padding: 0;
+    font-size: 0;
+    color: white;
+    text-transform: uppercase;
+    font-weight: bold;
+    font-family: inherit;
+    line-height: 1.2;
+	transition: color .3s ease;
+}
+
+.pauseMenu button:hover {
+	color: gold;
+}
+
+.pauseMenu button::before {
+	display: block;
+    font-family: FontAwesome;
+    font-size: 10vh;
+}
+
+.game-board {
+    display: flex;
+    flex-direction: column;
+    height: 92vh;
+	background: lightslategray;
+}
+
+.board-row {
+	flex-grow: 1;
+	display: flex;
+}
+ 
+
+.status {
+  margin-bottom: 10px;
+	display: none;
+}
+
+.status.win {
+    display: flex;
+	flex-wrap: wrap;
+    text-align: center;
+    position: absolute;
+    z-index: 2;
+    width: 100vw;
+    height: 100vh;
+    align-items: center;
+    justify-content: center;
+	background: rgba(0,0,0,.5);
+}
+
+.status span {
+	padding: 0 .5em;
+	width: 100%;
+	font-size: 40px;
+    color: gold;
+    text-shadow: black 1px 1px 4px;
+}
+
+.status button {
+	padding: 0 .5em;
+	font-size: 24px;
+    color: white;
+    text-shadow: black 1px 1px 4px;
+	background: none;
+	border: none;
+	outline: none;
+}
+
+.square {
+  background: #fff;
+  border: 1px solid #999;
+  flex-grow: 1;
+  min-width: 36px;
+	margin: 2%;
+  font-size: 0;
+  font-weight: bold;  
+  padding: 0;
+  text-align: center; 
+	position: relative;
+    border-radius: 10px;
+	overflow: hidden;
+}
+
+.square::after {
+	z-index: 1;
+	content: '';
+	position: absolute;
+	left: 0;
+	top: 0;
+	display: block;
+	width: 100%;
+	height: 100%;
+    border-radius: 10px;
+    border: 1px solid rgba(0,0,0,.3);
+    box-shadow: inset 1px 1px 20px 0px rgba(0,0,0,.3);
+	transition: box-shadow .5s ease;
+}
+
+.square.visible::after {
+	box-shadow: inset 1px 1px 20px 0px rgb(181, 204, 255);
+}
+
+.square.visible.found::after {
+	box-shadow: inset 1px 1px 20px 0px rgb(255, 243, 104);
+}
+
+.square:focus {
+  outline: none;
+}
+
+.square img {
+	opacity: 0;
+	transition: opacity .3s .9s ease;
+	position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    margin: auto;
+    max-width: 100%;
+    max-height: 100%;
+}
+
+.square span {
+	opacity: 0;
+}
+
+.square span.animated {
+	position: absolute;
+	bottom: 20%;
+	z-index: 1;
+	font-size: 18px;
+	margin: auto;
+	left: 0;
+	right: 0;
+	opacity: 1;
+	padding: 0 .5em;
+	
+    color: white;
+    text-shadow: black 1px 1px 4px;
+}
+
+.medium .square span.animated {
+	font-size: 16px;
+}
+
+.hard .square {
+	margin: 1%;
+}
+
+.hard .square span.animated {
+	font-size: 10px;
+}
+
+.square.visible img {
+	transition: opacity 1s 0s ease;
+	opacity: 1;
+}
+
+.kbd-navigation .square:focus {
+  background: #ddd;
+}
+
+
+.game-info {
+  margin-left: 20px;
+}
