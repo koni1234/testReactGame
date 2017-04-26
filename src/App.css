@@ -23,14 +23,17 @@ h1 {
 
 .gameSelection li {
 	position: relative;
+	margin: 2%;
+	overflow: hidden;
 }
 
-.gameLevelSelection { 
+.gameLevelSelection,
+.gameModeSelection { 
     position: absolute;
     top: 0;
     left: 0;
-    margin: 2%;
-    width: 96%;
+    margin: 0;
+    width: 100%;
     height: 20vh;
 	z-index: 1;
 	background: rgba(0,0,0,.5);
@@ -39,7 +42,8 @@ h1 {
 	align-items: center;
 }
 
-.gameLevelSelection button {
+.gameLevelSelection button,
+.gameModeSelection button {
     background: none;
     border: 0;
     outline: none;
@@ -54,11 +58,13 @@ h1 {
 	margin: 0 3vw;
 }
 
-.gameLevelSelection button:hover {
+.gameLevelSelection button:hover,
+.gameModeSelection button:hover {
 	color: gold;
 }
 
-.gameLevelSelection button::before {
+.gameLevelSelection button::before,
+.gameModeSelection button::before {
 	display: block;
     font-family: FontAwesome;
     font-size: 10vh;
@@ -67,8 +73,8 @@ h1 {
 .selectGame {
 	background: #fff;
 	border: 1px solid #999;
-	margin: 2%;
-    width: 96%;
+	margin: 0;
+    width: 100%;
 	font-weight: bold;  
 	padding: 0;
 	text-align: center; 

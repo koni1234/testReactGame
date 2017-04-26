@@ -53,6 +53,17 @@ function SelectGameLevel(props) {
   	);
 }
 
+function SelectGameMode(props) {
+	const classes = (props.className) ? props.className : "";  
+	const text = props.type ; 
+	
+	return (
+		<button className={classes} data-gameLevel={props.type} onClick={() => props.onClick()}>
+			<span>{text}</span>
+    	</button>
+  	);
+}
+
 class Timer extends React.Component {
 	constructor(props) {
     	super(props); 
@@ -135,10 +146,11 @@ class Board extends React.Component {
 			pause: false,
 			selectedGame: "",
 			gameLevel: "",
+			gameMode: "",
 			startTime: "",
 		};
 	}	
-
+	 
 	handleClick(i) {
   		const squares = this.state.squares.slice();
   		const squareVisible = this.state.squareVisible;
@@ -195,6 +207,7 @@ class Board extends React.Component {
 			pause: false,
 			selectedGame: "",
 			gameLevel: "",
+			gameMode: "",
 			startTime: ""
 		});
 	}
@@ -235,19 +248,24 @@ class Board extends React.Component {
 		});
 	}
 	
-	selectGame(i) {
+	checkGame() {
+		const gameLevel = this.state.gameLevel;
+		const gameMode = this.state.gameMode;
+		const selectedGame = this.state.selectedGame;
+		const startTime = this.state.startTime;
 		
-		this.setState({
-			squares: [],
-			selectedGame: i.game,
-		});
+		if(selectedGame && gameLevel && gameMode && !startTime) this.startGame();
+		
 	}
 	
-	selectGameLevel(i){
-		const cells = (i.type === "easy") ? 3 : (i.type === "medium") ? 4 : 5;
-		const rows = (i.type === "easy") ? 4 : (i.type === "medium") ? 5 : 6; 
+	startGame(){
+		const gameLevel = this.state.gameLevel; 
+		const selectedGame = this.state.selectedGame;
+		
+		const cells = (gameLevel === "easy") ? 3 : (gameLevel === "medium") ? 4 : 5;
+		const rows = (gameLevel === "easy") ? 4 : (gameLevel === "medium") ? 5 : 6; 
 		let squares = [];
-		const sortedData = this.state.selectedGame.data.sort(function() { return 0.5 - Math.random() });
+		const sortedData = selectedGame.data.sort(function() { return 0.5 - Math.random() });
 		
 		for(let x = 0, y ; x<( rows * cells); x++) {
 			y = ( 1+x> ( rows * cells)/2) ? 1+x - (rows * cells)/2 : 1+x ;
@@ -262,29 +280,58 @@ class Board extends React.Component {
 		
 		this.setState({
 			squares: squares.sort(function() { return 0.5 - Math.random() }),
-			gameLevel: i.type,
 			rows: rows,
 			cells: cells,
 			squareVisible: "",
 			pause: false,
 			startTime: Date.now(),
 		});
-		
+	}
+	
+	selectGame(i) {
+		this.setState({
+			squares: [],
+			gameLevel: "",
+			gameMode: "",
+			selectedGame: i.game,
+		});
+	}
+	
+	selectGameLevel(i) {
+		this.setState({
+			gameMode: "",
+			gameLevel: i.type,
+		});
+	}
+	
+	selectGameMode(i){
+		this.setState({
+			gameMode: i.type,
+		},this.checkGame);
 	}
 	
 	renderGameSelection() {
 		const gamesx = games();
 		const selectedGame = this.state.selectedGame;
+		const gameLevel = this.state.gameLevel;
 		let output = [],
 			i = 0;
 		
 		gamesx.forEach((game) => {
 		
 			if(selectedGame.name === game.name) {
-				output.push(<li key={'game' + i}>{
-					this.renderSelectGame({game: game , className:"selectGame " , selected: (selectedGame.name === game.name) ? true : false  })}
-					   {this.renderGameLevelSelection()
-				}</li>);
+				if(gameLevel) {
+					output.push(<li key={'game' + i}>{
+						this.renderSelectGame({game: game , className:"selectGame " , selected: (selectedGame.name === game.name) ? true : false  })}
+						   {this.renderGameLevelSelection()}{this.renderGameModeSelection()
+					}</li>);
+				}
+				else {
+					output.push(<li key={'game' + i}>{
+						this.renderSelectGame({game: game , className:"selectGame " , selected: (selectedGame.name === game.name) ? true : false  })}
+						   {this.renderGameLevelSelection()
+					}</li>);
+				}
 			}
 			else {
 				output.push(<li key={'game' + i}>{
@@ -302,11 +349,19 @@ class Board extends React.Component {
 	}
 	
 	renderGameLevelSelection() {
-		return(<div key={'renderGameLevelSelection'} className="gameLevelSelection animated fadeIn">
-			   <div key={'sub'} className=" animated SlideInLeft">
+		const animation = this.state.gameLevel ? "animated slideOutLeft" : "animated fadeIn";
+		return(<div key={'renderGameLevelSelection'} className={"gameLevelSelection " + animation}>
+			   <div key={'sub'}>
 			   {this.renderSelectGameLevel({type:"easy", className:"easy fa fa-th-large"})}
 			   {this.renderSelectGameLevel({type:"medium", className:"medium fa fa-th"})}
 			   {this.renderSelectGameLevel({type:"hard", className:"hard fa fa-th"})}
+			   </div></div>);
+	}
+	renderGameModeSelection() {
+		return(<div key={'renderGameModeSelection'} className="gameModeSelection animated slideInRight">
+			   <div key={'sub'}>
+			   {this.renderSelectGameMode({type:"time", className:"time fa fa-clock"})}
+			   {this.renderSelectGameMode({type:"free", className:"free fa fa-run"})}
 			   </div></div>);
 	}
 	
@@ -394,6 +449,16 @@ class Board extends React.Component {
 			className={i.className}
 			onClick={() => this.selectGameLevel(i)}
 		/>;
+	}	
+			
+	renderSelectGameMode(i) {
+		return <SelectGameMode
+			key={i.type}
+			type={i.type}
+			value={i.type}
+			className={i.className}
+			onClick={() => this.selectGameMode(i)}
+		/>;
 	}
 	
 	renderButton(i) {
@@ -442,6 +507,8 @@ class Board extends React.Component {
 		const winner = calculateWinner(this.state.squares);
 	  	const pause = this.state.pause;
 		const gameLevel = this.state.gameLevel;
+		const gameMode = this.state.gameMode;
+		const startTime = this.state.startTime;
 		let status;
 		let output = [];
 		
@@ -453,7 +520,7 @@ class Board extends React.Component {
 				{this.renderButton({type:"index", })}
 			</div>);
 		}
-		if(this.state.selectedGame && gameLevel) {
+		if(this.state.selectedGame && gameLevel && gameMode && startTime) {
 			if(pause === true) {
 				output.push(this.renderPauseMenu());
 			}
