@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import ReactDOM from 'react-dom';
 import logo from './logo.svg';
 import './animate.css';
 import './App.css';
@@ -68,9 +69,10 @@ class Timer extends React.Component {
 	constructor(props) {
     	super(props); 
 		this.state = {
-			time: 0,
+			time: (props.mode === "time") ? 60 : 0,
 			timer: "",
 			start: props.start,
+			mode: props.mode,
 			pause: props.pause
 		};
 	}	
@@ -80,37 +82,49 @@ class Timer extends React.Component {
         // componentDidMount is called by react when the component 
         // has been rendered on the page. We can set the interval here:
 
-        this.timer = setInterval( () => this.tick(), 1000);
+        this.start();
     }
 
     componentWillUnmount(){
 
         // This method is called immediately before the component is removed
         // from the page and destroyed. We can clear the interval here:
-
-        clearInterval(this.timer);
+		this.stop();
     }
 	
 	componentWillReceiveProps(nextProps) {
 		if(nextProps.start !== this.state.start) {
+			this.stop();
 			this.setState({ 
 				pause: nextProps.pause,
 				start: nextProps.start,
-				time: 0
+				time: (nextProps.mode === "time") ? 60 : 0
 			});
+			this.start();
 		}
 		else {
 			this.setState({ pause: nextProps.pause });
 		}
 	}
+	
+	start() {
+		
+        this.timer = setInterval( () => this.tick(), 1000);
+	}
 
+	stop() {
+		
+        clearInterval(this.timer);
+	}
+	
     tick(props){
 
         // This function is called every 50 ms. It updates the 
         // elapsed counter. Calling setState causes the component to be re-rendered
 
 		if(!this.state.pause) {
-			this.setState({time: this.state.time+1 });
+			let time = (this.state.mode === "time") ? this.state.time - 1 : this.state.time + 1;
+			this.setState({time: time });
 		}
     }
 		 
@@ -118,7 +132,7 @@ class Timer extends React.Component {
          
         const seconds = this.state.time;
  
-        return <div key="timer" className="timer"><span>{seconds}</span></div>;
+        return <div key="timer" ref="timer" className="timer"><span ref="timerValue" >{seconds}</span></div>;
     }
 }
 
@@ -150,6 +164,25 @@ class Board extends React.Component {
 			startTime: "",
 		};
 	}	
+	
+    componentDidMount(){
+
+        // componentDidMount is called by react when the component 
+        // has been rendered on the page. We can set the interval here:
+
+        this.checkTimer();
+    }
+	
+	checkTimer() {
+		
+        this.timer = setInterval( () => {
+			//check x casistica gameMode == time
+			/*
+		const time =  this.refs.timerVal !== undefined ? this.refs.timerVal.refs.timerValue.innerHTML : 1;
+		const loser = (this.state.gameMode === "time" && time < 1) ? true : false;*/
+		}, 1000);
+	}
+
 	 
 	handleClick(i) {
   		const squares = this.state.squares.slice();
@@ -357,11 +390,12 @@ class Board extends React.Component {
 			   {this.renderSelectGameLevel({type:"hard", className:"hard fa fa-th"})}
 			   </div></div>);
 	}
+	
 	renderGameModeSelection() {
 		return(<div key={'renderGameModeSelection'} className="gameModeSelection animated slideInRight">
 			   <div key={'sub'}>
-			   {this.renderSelectGameMode({type:"time", className:"time fa fa-clock"})}
-			   {this.renderSelectGameMode({type:"free", className:"free fa fa-run"})}
+			   {this.renderSelectGameMode({type:"time", className:"time fa fa-clock-o"})}
+			   {this.renderSelectGameMode({type:"free", className:"free fa fa-flash"})}
 			   </div></div>);
 	}
 	
@@ -495,10 +529,14 @@ class Board extends React.Component {
 	
 	renderTimer(i) {
 		const winner = calculateWinner(this.state.squares);
-		const pause = (this.state.pause === true || winner) ? true : false;
+		const time =  this.refs.timerVal !== undefined ? this.refs.timerVal.refs.timerValue.innerHTML : 1;
+		const loser = (this.state.gameMode === "time" && time < 1) ? true : false;
+		const pause = (this.state.pause === true || winner || loser) ? true : false;
 		return <Timer
 			key={'timer'}
+			mode={this.state.gameMode}
 			start={this.state.startTime}
+			ref="timerVal"
 			pause={pause}
 		/>;
 	}
