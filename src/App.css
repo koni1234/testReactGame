@@ -226,7 +226,8 @@ h1 {
 	display: none;
 }
 
-.status.win {
+.status.win,
+.status.lose {
     display: flex;
 	flex-wrap: wrap;
     text-align: center;

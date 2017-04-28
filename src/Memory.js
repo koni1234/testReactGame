@@ -1,5 +1,4 @@
 import React, { Component } from 'react';
-import ReactDOM from 'react-dom';
 import logo from './logo.svg';
 import './animate.css';
 import './App.css';
@@ -65,77 +64,6 @@ function SelectGameMode(props) {
   	);
 }
 
-class Timer extends React.Component {
-	constructor(props) {
-    	super(props); 
-		this.state = {
-			time: (props.mode === "time") ? 60 : 0,
-			timer: "",
-			start: props.start,
-			mode: props.mode,
-			pause: props.pause
-		};
-	}	
-	
-    componentDidMount(){
-
-        // componentDidMount is called by react when the component 
-        // has been rendered on the page. We can set the interval here:
-
-        this.start();
-    }
-
-    componentWillUnmount(){
-
-        // This method is called immediately before the component is removed
-        // from the page and destroyed. We can clear the interval here:
-		this.stop();
-    }
-	
-	componentWillReceiveProps(nextProps) {
-		if(nextProps.start !== this.state.start) {
-			this.stop();
-			this.setState({ 
-				pause: nextProps.pause,
-				start: nextProps.start,
-				time: (nextProps.mode === "time") ? 60 : 0
-			});
-			this.start();
-		}
-		else {
-			this.setState({ pause: nextProps.pause });
-		}
-	}
-	
-	start() {
-		
-        this.timer = setInterval( () => this.tick(), 1000);
-	}
-
-	stop() {
-		
-        clearInterval(this.timer);
-	}
-	
-    tick(props){
-
-        // This function is called every 50 ms. It updates the 
-        // elapsed counter. Calling setState causes the component to be re-rendered
-
-		if(!this.state.pause) {
-			let time = (this.state.mode === "time") ? this.state.time - 1 : this.state.time + 1;
-			this.setState({time: time });
-		}
-    }
-		 
-	render() {
-         
-        const seconds = this.state.time;
- 
-        return <div key="timer" ref="timer" className="timer"><span ref="timerValue" >{seconds}</span></div>;
-    }
-}
-
 class Board extends React.Component {
 	constructor(props) {
     	super(props);
@@ -151,6 +79,7 @@ class Board extends React.Component {
 				data: ""
 			}
 		}
+		
 		this.state = {
 			squares: squares.sort(function() { return 0.5 - Math.random() }),
 			squareVisible: "",
@@ -162,6 +91,8 @@ class Board extends React.Component {
 			gameLevel: "",
 			gameMode: "",
 			startTime: "",
+			time: "",
+			timer: "",
 		};
 	}	
 	
@@ -170,17 +101,22 @@ class Board extends React.Component {
         // componentDidMount is called by react when the component 
         // has been rendered on the page. We can set the interval here:
 
-        this.checkTimer();
+        this.setState({timer: setInterval( () => this.checkTimer() , 1000)});
     }
 	
 	checkTimer() {
-		
-        this.timer = setInterval( () => {
-			//check x casistica gameMode == time
-			/*
-		const time =  this.refs.timerVal !== undefined ? this.refs.timerVal.refs.timerValue.innerHTML : 1;
-		const loser = (this.state.gameMode === "time" && time < 1) ? true : false;*/
-		}, 1000);
+		const winner = calculateWinner(this.state.squares);
+		const pause = this.state.pause;
+		const selectedGame = this.state.selectedGame;
+		const startTime = this.state.startTime;
+		const mode = this.state.gameMode;
+		const time = this.state.time;
+			
+		if(!pause && selectedGame && startTime && !winner && ( ( mode !== "time" ) || time > 0 )) {
+			let mode = this.state.gameMode;
+			let newTime = ( mode === "time") ? time - 1 : time + 1;
+			this.setState({time: newTime });
+		}
 	}
 
 	 
@@ -241,7 +177,8 @@ class Board extends React.Component {
 			selectedGame: "",
 			gameLevel: "",
 			gameMode: "",
-			startTime: ""
+			startTime: "",
+			time: ""
 		});
 	}
 	
@@ -260,6 +197,7 @@ class Board extends React.Component {
 	newGame(i) { 
 		let squares = [];
 		const sortedData = i.game.data.sort(function() { return 0.5 - Math.random() });
+		const time = ( this.state.gameMode === "time") ? 60 : 0;
 		
 		for(let x = 0, y ; x<(this.state.rows * this.state.cells); x++) {
 			y = ( 1+x> (this.state.rows * this.state.cells)/2) ? 1+x - (this.state.rows * this.state.cells)/2 : 1+x ;
@@ -278,6 +216,7 @@ class Board extends React.Component {
 			pause: false,
 			selectedGame: i.game,
 			startTime: Date.now(),
+			time: time
 		});
 	}
 	
@@ -294,6 +233,7 @@ class Board extends React.Component {
 	startGame(){
 		const gameLevel = this.state.gameLevel; 
 		const selectedGame = this.state.selectedGame;
+		const time = ( this.state.gameMode === "time") ? 60 : 0;
 		
 		const cells = (gameLevel === "easy") ? 3 : (gameLevel === "medium") ? 4 : 5;
 		const rows = (gameLevel === "easy") ? 4 : (gameLevel === "medium") ? 5 : 6; 
@@ -318,6 +258,7 @@ class Board extends React.Component {
 			squareVisible: "",
 			pause: false,
 			startTime: Date.now(),
+			time: time
 		});
 	}
 	
@@ -528,17 +469,9 @@ class Board extends React.Component {
 	}
 	
 	renderTimer(i) {
-		const winner = calculateWinner(this.state.squares);
-		const time =  this.refs.timerVal !== undefined ? this.refs.timerVal.refs.timerValue.innerHTML : 1;
-		const loser = (this.state.gameMode === "time" && time < 1) ? true : false;
-		const pause = (this.state.pause === true || winner || loser) ? true : false;
-		return <Timer
-			key={'timer'}
-			mode={this.state.gameMode}
-			start={this.state.startTime}
-			ref="timerVal"
-			pause={pause}
-		/>;
+		const seconds = this.state.time;
+ 
+        return <div key="timer" className="timer"><span >{seconds}</span></div>;
 	}
 	
 	render() {
@@ -547,12 +480,23 @@ class Board extends React.Component {
 		const gameLevel = this.state.gameLevel;
 		const gameMode = this.state.gameMode;
 		const startTime = this.state.startTime;
-		let status;
+		const time = this.state.time;
+		const looser = ( gameMode === "time" && time < 1 && !winner) ? true : false;
 		let output = [];
 		
-	  	if (winner) {
-			status = 'Hai vinto!';
-	  		output.push(<div key={'0'} className={(winner) ? "status win animated fadeIn" : "status"}>
+	  	if (winner || looser) {
+			let status;
+			let cssClass;
+			
+			if(winner) {
+				status = 'Hai vinto!';
+				cssClass = "status win animated fadeIn";
+			}
+			else {
+				status = 'Hai perso!';
+				cssClass = "status lose animated fadeIn";
+			}
+	  		output.push(<div key={'0'} className={cssClass}>
 				<span className="animated infinite pulse" key={0}>{status}</span>
 				{this.renderButton({type:"playAgain", game:this.state.selectedGame, })}
 				{this.renderButton({type:"index", })}
