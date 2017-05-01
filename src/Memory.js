@@ -76,6 +76,7 @@ class Board extends React.Component {
 				value: y,
 				visible: false,
 				found: false,
+				firstView: false,
 				data: ""
 			}
 		}
@@ -93,7 +94,11 @@ class Board extends React.Component {
 			startTime: "",
 			time: "",
 			timer: "",
+			points: 0,
+			lastPoints: 0
 		};
+		
+		this.handleAnimationEnd = this.handleAnimationEnd.bind(this)
 	}	
 	
     componentDidMount(){
@@ -102,6 +107,16 @@ class Board extends React.Component {
         // has been rendered on the page. We can set the interval here:
 
         this.setState({timer: setInterval( () => this.checkTimer() , 1000)});
+		
+	}
+	
+	componentDidUpdate(){
+		const elm = this.refs.lastPoints;
+		
+		if(elm!== undefined && elm.className === "") {
+			elm.className = "animated fadeIn";
+			elm.addEventListener('animationend', this.handleAnimationEnd);
+		}
     }
 	
 	checkTimer() {
@@ -119,30 +134,45 @@ class Board extends React.Component {
 		}
 	}
 
-	 
 	handleClick(i) {
   		const squares = this.state.squares.slice();
+		const winner = calculateWinner(squares);
   		const squareVisible = this.state.squareVisible;
 		
-		if (calculateWinner(squares) || squareVisible === i || squares[i].visible === true ) {
+		if (winner || squareVisible === i || squares[i].visible === true ) {
 			return;
 		}
+		
 		if(squareVisible.toString().length && squares[squareVisible].value === squares[i].value) {
+			//calc points
+			let lastPoints = 50;
+			
+			if(!squares[i].firstView) lastPoints += 10;
+			if(!squares[squareVisible].firstView) lastPoints += 10;
+			
+			let point = this.state.points + lastPoints;
+			
 			squares[i].visible = true;
 			squares[i].found = true;
+			squares[i].firstView = true;
 			squares[squareVisible].found = true;
+			squares[squareVisible].firstView = true;
 			this.setState({
 				squares: squares,
 				squareVisible: "",
 				lastClickedSquare: "",
+				points: point,
+				lastPoints: lastPoints
 			});
 		}
 		else if(squareVisible.toString().length) {
+			squares[i].firstView = true;
 			squares[squareVisible].visible = false;
+			squares[squareVisible].firstView = true;
 			this.setState({
 				squares: squares,
 				squareVisible: "",
-				lastClickedSquare: i,
+				lastClickedSquare: i
 			});
 		}
 		else {
@@ -153,6 +183,15 @@ class Board extends React.Component {
 				lastClickedSquare: "",
 			});
 		}
+	}
+	
+	handleAnimationEnd(){
+		const elm = this.refs.lastPoints;
+		elm.removeEventListener('animationend', this.handleAnimationEnd )
+		elm.className = "fadeIn";
+		this.setState({
+			lastPoints: 0
+		});
 	}
 	
 	mainMenu(i) {
@@ -178,7 +217,8 @@ class Board extends React.Component {
 			gameLevel: "",
 			gameMode: "",
 			startTime: "",
-			time: ""
+			time: "",
+			points: 0
 		});
 	}
 	
@@ -191,32 +231,6 @@ class Board extends React.Component {
 	resumeGame(i) {
 		this.setState({
 			pause: false
-		});
-	}
-	
-	newGame(i) { 
-		let squares = [];
-		const sortedData = i.game.data.sort(function() { return 0.5 - Math.random() });
-		const time = ( this.state.gameMode === "time") ? 60 : 0;
-		
-		for(let x = 0, y ; x<(this.state.rows * this.state.cells); x++) {
-			y = ( 1+x> (this.state.rows * this.state.cells)/2) ? 1+x - (this.state.rows * this.state.cells)/2 : 1+x ;
-			squares[x] = {
-				key: x,
-				value: y,
-				visible: false,
-				found: false,
-				data: sortedData[y - 1]
-			}
-		}
-		
-		this.setState({
-			squares: squares.sort(function() { return 0.5 - Math.random() }),
-			squareVisible: "",
-			pause: false,
-			selectedGame: i.game,
-			startTime: Date.now(),
-			time: time
 		});
 	}
 	
@@ -247,6 +261,7 @@ class Board extends React.Component {
 				value: y,
 				visible: false,
 				found: false,
+				firstView: false,
 				data: sortedData[y - 1]
 			}
 		}
@@ -258,7 +273,9 @@ class Board extends React.Component {
 			squareVisible: "",
 			pause: false,
 			startTime: Date.now(),
-			time: time
+			time: time,
+			points: 0,
+			lastPoints: 0
 		});
 	}
 	
@@ -344,6 +361,7 @@ class Board extends React.Component {
 		let output = [];
 		
 		output.push(this.renderButton({type:"pause", className:"pause fa fa-pause-circle-o" }));
+		output.push(this.renderGamePoints());
 		output.push(this.renderTimer());
 		
 		return (<div key={'topBar'} className={'topBar'}>
@@ -443,7 +461,7 @@ class Board extends React.Component {
 			value={i.type}
 			game={i.game}
 			className={i.className}
-			onClick={() => this.newGame(i)}
+			onClick={() => this.startGame(i)}
 		/>;
 		else if(i.type === "index" )
 		return <Button
@@ -472,6 +490,22 @@ class Board extends React.Component {
 		const seconds = this.state.time;
  
         return <div key="timer" className="timer"><span >{seconds}</span></div>;
+	}
+			
+	renderGamePoints(){
+		const points = this.state.points;
+		const lastPoints = this.state.lastPoints;
+		let output = [];
+ 
+	  	if(lastPoints > 0 ) {
+			output.push(<span className="" ref="lastPoints">+{lastPoints}</span>);
+			output.push(<span className="" >{points} <i className="fa fa-trophy"></i></span>);
+		}
+		else {
+			output.push(<span className="" >{points} <i className="fa fa-trophy"></i></span>);
+		}
+			
+        return <div key="points" className="points">{output}</div>;
 	}
 	
 	render() {

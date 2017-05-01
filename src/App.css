@@ -137,6 +137,7 @@ h1 {
     padding: 0 2.5vw;
     background: none;
     border: 0;
+  	border-right: 1px solid rgba(255,255,255,.2);
     outline: none;
 }
 
@@ -144,10 +145,22 @@ h1 {
 	font-size: 5vh;
 }
 
-.timer {
+.points {
     justify-content: flex-end;
     align-items: center;
     flex-grow: 1;
+    display: flex;
+}
+
+.points span {
+	font-size: 4vh;
+	color: gold;
+	padding: 0 2.5vw;
+}
+
+.timer {
+    justify-content: flex-end;
+    align-items: center;
     display: flex;
 }
 
