@@ -158,6 +158,10 @@ h1 {
 	padding: 0 2.5vw;
 }
 
+.hidden {
+	display: none;
+}
+
 .timer {
     justify-content: flex-end;
     align-items: center;
@@ -261,14 +265,25 @@ h1 {
     text-shadow: black 1px 1px 4px;
 }
 
+.status span.counter {
+	font-size: 30px;
+}
+
 .status button {
 	padding: 0 .5em;
 	font-size: 24px;
+    font-family: inherit;
     color: white;
     text-shadow: black 1px 1px 4px;
 	background: none;
 	border: none;
 	outline: none;
+}
+
+.status button::before {
+    font-size: 40px;
+    font-family: FontAwesome;
+    display: block;
 }
 
 .square {

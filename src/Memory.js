@@ -20,7 +20,7 @@ function Square(props) {
 function Button(props) {
 	const classes = (props.className) ? props.className : "";
 	
-	const text = (props.value === "pause") ? "pause" : (props.value === "index") ? "home" : (props.value === "playAgain") ? "play again" : props.value;
+	const text = (props.value === "pause") ? "pause" : (props.value === "index") ? "home" : props.value;
 	
 	return (
 		<button className={classes} onClick={() => props.onClick()}>
@@ -64,6 +64,74 @@ function SelectGameMode(props) {
   	);
 }
 
+class Counter extends React.Component {
+	constructor(props) {
+    	super(props);
+		
+		this.state = {
+			from: (props.from) ? props.from : 0,  // the number the element should start at
+			to:  (props.to) ? props.to : 100,  // the number the element should end at
+			duration: (props.duration) ? props.duration : 1000,  // how long it should take to count between the target numbers
+			refreshInterval: (props.refreshInterval) ? props.refreshInterval : 100,  // how often the element should be updated
+			decimals: (props.decimals) ? props.decimals : 0,  // the number of decimal places to show
+			increment: 0,
+			timer: 0,
+			loops: 0,
+			loopCounter: 0,
+			value: (props.from) ? props.from : 0
+		};
+	}
+	
+    componentDidMount(){
+		const duration = this.state.duration;
+		const refreshInterval = this.state.refreshInterval;
+		const to = this.state.to;
+		const from = this.state.from;
+		const loops = Math.ceil( duration / refreshInterval);
+        const increment = (to - from) / loops;
+		
+		console.log('mount contatore');
+        this.setState({
+			increment: increment,
+			loops: loops,
+			loopCounter: 0,
+			value: from,
+			timer: setInterval( () => this.updateCounter() , duration)
+		});
+	}
+	
+    componentWillUnmount(){
+		this.stopCounter();
+	}
+	
+	updateCounter() {
+		const increment = this.state.increment;
+		const loops = this.state.loops;
+		const loopCounter = this.state.loopCounter + 1;
+		const value = (loopCounter >= loops) ? this.state.to : (this.state.value + increment);
+		
+		console.log('update contatore');
+		
+		if (loopCounter >= loops) this.stopCounter();
+		
+		this.setState({
+			loopCounter: loopCounter,
+			value: value 
+		});
+	}
+	
+	stopCounter() {
+		console.log('stop contatore');
+		clearInterval(this.state.timer);
+	}
+	
+	render() {
+		const value = this.state.value;
+		
+		return <span key="counter" className="counter">{value} points</span>;
+	}
+}
+
 class Board extends React.Component {
 	constructor(props) {
     	super(props);
@@ -98,7 +166,7 @@ class Board extends React.Component {
 			lastPoints: 0
 		};
 		
-		this.handleAnimationEnd = this.handleAnimationEnd.bind(this)
+		this.handleAnimationEnd = this.handleAnimationEnd.bind(this);
 	}	
 	
     componentDidMount(){
@@ -114,7 +182,7 @@ class Board extends React.Component {
 		const elm = this.refs.lastPoints;
 		
 		if(elm!== undefined && elm.className === "") {
-			elm.className = "animated fadeIn";
+			elm.className = "animated fadeInOut";
 			elm.addEventListener('animationend', this.handleAnimationEnd);
 		}
     }
@@ -187,8 +255,9 @@ class Board extends React.Component {
 	
 	handleAnimationEnd(){
 		const elm = this.refs.lastPoints;
-		elm.removeEventListener('animationend', this.handleAnimationEnd )
-		elm.className = "fadeIn";
+		elm.removeEventListener('animationend', this.handleAnimationEnd );
+		elm.className = "";
+		
 		this.setState({
 			lastPoints: 0
 		});
@@ -455,7 +524,7 @@ class Board extends React.Component {
 	}
 	
 	renderButton(i) {
-		if(i.type === "playAgain" || i.type === "restart" )
+		if(i.type === "play again" || i.type === "restart" )
 		return <Button
 			key={i.type}
 			value={i.type}
@@ -485,6 +554,17 @@ class Board extends React.Component {
 			onClick={() => this.pauseGame(i)}
 		/>;
 	}
+			
+	renderScore() {
+		const score = this.state.points;
+		
+		return <Counter 
+			from={0} 
+			to={score} 
+			duration={100}
+			refreshInterval={10}
+		/>;
+	}
 	
 	renderTimer(i) {
 		const seconds = this.state.time;
@@ -495,15 +575,13 @@ class Board extends React.Component {
 	renderGamePoints(){
 		const points = this.state.points;
 		const lastPoints = this.state.lastPoints;
+		const cssClass = (parseInt(lastPoints) > 0 ) ? "" : "hidden";//animated fadeOut
 		let output = [];
  
-	  	if(lastPoints > 0 ) {
-			output.push(<span className="" ref="lastPoints">+{lastPoints}</span>);
-			output.push(<span className="" >{points} <i className="fa fa-trophy"></i></span>);
-		}
-		else {
-			output.push(<span className="" >{points} <i className="fa fa-trophy"></i></span>);
-		}
+	  	output.push(<span className={cssClass} ref="lastPoints">+{lastPoints}</span>);
+					
+		
+		output.push(<span className="" >{points} <i className="fa fa-trophy"></i></span>);
 			
         return <div key="points" className="points">{output}</div>;
 	}
@@ -525,16 +603,24 @@ class Board extends React.Component {
 			if(winner) {
 				status = 'Hai vinto!';
 				cssClass = "status win animated fadeIn";
+				
+				output.push(<div key={'0'} className={cssClass}>
+					<span className="animated infinite pulse" key={0}>{status}</span>
+					{this.renderScore()}
+					{this.renderButton({type:"play again", game:this.state.selectedGame, className:"continue fa fa-play", })}
+					{this.renderButton({type:"index", className:"continue fa fa-home", })}
+				</div>);
 			}
 			else {
 				status = 'Hai perso!';
 				cssClass = "status lose animated fadeIn";
+				
+				output.push(<div key={'0'} className={cssClass}>
+					<span className="animated infinite pulse" key={0}>{status}</span>
+					{this.renderButton({type:"play again", game:this.state.selectedGame, className:"continue fa fa-play", })}
+					{this.renderButton({type:"index", className:"continue fa fa-home", })}
+				</div>);
 			}
-	  		output.push(<div key={'0'} className={cssClass}>
-				<span className="animated infinite pulse" key={0}>{status}</span>
-				{this.renderButton({type:"playAgain", game:this.state.selectedGame, })}
-				{this.renderButton({type:"index", })}
-			</div>);
 		}
 		if(this.state.selectedGame && gameLevel && gameMode && startTime) {
 			if(pause === true) {
