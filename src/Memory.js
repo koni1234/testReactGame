@@ -1,5 +1,8 @@
-import React, { Component } from 'react';
-import logo from './logo.svg';
+import React from 'react'; 
+import {Button} from './Functions';
+import Counter from './Counter';
+import UserPanel from './User';
+//import update from 'immutability-helper';
 import './animate.css';
 import './App.css';
 
@@ -13,18 +16,6 @@ function Square(props) {
 		<button className={classes + " square"} onClick={() => props.onClick()}>
 			<span className={(found) ? "animated fadeInUp" : ""}>{props.data.name}</span>
 			<img className={(lastClicked && !found ) ? "animated fadeInOut" : ""} src={props.data.image} alt={props.data.name}/>
-    	</button>
-  	);
-}
-
-function Button(props) {
-	const classes = (props.className) ? props.className : "";
-	
-	const text = (props.value === "pause") ? "pause" : (props.value === "index") ? "home" : props.value;
-	
-	return (
-		<button className={classes} onClick={() => props.onClick()}>
-			{text}
     	</button>
   	);
 }
@@ -64,74 +55,6 @@ function SelectGameMode(props) {
   	);
 }
 
-class Counter extends React.Component {
-	constructor(props) {
-    	super(props);
-		
-		this.state = {
-			from: (props.from) ? props.from : 0,  // the number the element should start at
-			to:  (props.to) ? props.to : 100,  // the number the element should end at
-			duration: (props.duration) ? props.duration : 1000,  // how long it should take to count between the target numbers
-			refreshInterval: (props.refreshInterval) ? props.refreshInterval : 100,  // how often the element should be updated
-			decimals: (props.decimals) ? props.decimals : 0,  // the number of decimal places to show
-			increment: 0,
-			timer: 0,
-			loops: 0,
-			loopCounter: 0,
-			value: (props.from) ? props.from : 0
-		};
-	}
-	
-    componentDidMount(){
-		const duration = this.state.duration;
-		const refreshInterval = this.state.refreshInterval;
-		const to = this.state.to;
-		const from = this.state.from;
-		const loops = Math.ceil( duration / refreshInterval);
-        const increment = (to - from) / loops;
-		
-		console.log('mount contatore');
-        this.setState({
-			increment: increment,
-			loops: loops,
-			loopCounter: 0,
-			value: from,
-			timer: setInterval( () => this.updateCounter() , duration)
-		});
-	}
-	
-    componentWillUnmount(){
-		this.stopCounter();
-	}
-	
-	updateCounter() {
-		const increment = this.state.increment;
-		const loops = this.state.loops;
-		const loopCounter = this.state.loopCounter + 1;
-		const value = (loopCounter >= loops) ? this.state.to : (this.state.value + increment);
-		
-		console.log('update contatore');
-		
-		if (loopCounter >= loops) this.stopCounter();
-		
-		this.setState({
-			loopCounter: loopCounter,
-			value: value 
-		});
-	}
-	
-	stopCounter() {
-		console.log('stop contatore');
-		clearInterval(this.state.timer);
-	}
-	
-	render() {
-		const value = this.state.value;
-		
-		return <span key="counter" className="counter">{value} points</span>;
-	}
-}
-
 class Board extends React.Component {
 	constructor(props) {
     	super(props);
@@ -167,7 +90,7 @@ class Board extends React.Component {
 		};
 		
 		this.handleAnimationEnd = this.handleAnimationEnd.bind(this);
-	}	
+	}
 	
     componentDidMount(){
 
@@ -276,6 +199,8 @@ class Board extends React.Component {
 				data: ""
 			}
 		}
+		
+		localStorage.removeItem('userData');
 		
 		this.setState({
 			squares: squares.sort(function() { return 0.5 - Math.random() }),
@@ -449,7 +374,7 @@ class Board extends React.Component {
 			{output}
 		</div>);		
 	}
-
+			
 	renderBoard() {
 		const rows = this.state.rows;
 		let output = [];
@@ -556,14 +481,34 @@ class Board extends React.Component {
 	}
 			
 	renderScore() {
-		const score = this.state.points;
+		const gameMode = this.state.gameMode;
+		const time = this.state.time;
+		const score = (gameMode === "time") ? this.state.points + ( time * 20 ) : this.state.points;
 		
-		return <Counter 
-			from={0} 
-			to={score} 
-			duration={100}
-			refreshInterval={10}
-		/>;
+		let output = [];
+		
+		if(gameMode === "time") {
+			output.push(<Counter
+				from={time} 
+				units="seconds"
+				to={0} 
+				id="counter_inverse"
+				inverse={true}
+				className="animated fadeOut"
+				duration={2500}
+				refreshInterval={10}
+			/>);
+		} 
+		output.push(<Counter 
+						from={0} 
+						className="animated zoomScaleIn"
+						to={score} 
+						units="points"
+						duration={2500}
+						refreshInterval={10}
+						/>);
+					 
+		return output;
 	}
 	
 	renderTimer(i) {
@@ -594,6 +539,7 @@ class Board extends React.Component {
 		const startTime = this.state.startTime;
 		const time = this.state.time;
 		const looser = ( gameMode === "time" && time < 1 && !winner) ? true : false;
+		
 		let output = [];
 		
 	  	if (winner || looser) {
@@ -622,6 +568,9 @@ class Board extends React.Component {
 				</div>);
 			}
 		}
+		
+		output.push(<UserPanel />);
+		
 		if(this.state.selectedGame && gameLevel && gameMode && startTime) {
 			if(pause === true) {
 				output.push(this.renderPauseMenu());

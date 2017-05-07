@@ -9,12 +9,14 @@ body {
 	box-sizing: border-box;
 }
 
-h1 {
+h1 , h2 {
     text-transform: uppercase;
+	transition: filter .6s ease;
     font-size: 5vh;
 }
 
 .gameSelection {
+	transition: filter .6s ease;
 	margin: 0;
 	padding: 0;
 	display: flex;
@@ -173,6 +175,88 @@ h1 {
 	padding: 0 2.5vw;
 }
 
+.loginForm {
+    display: flex;
+	flex-direction: column;
+    justify-content: space-around;
+    align-items: center;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    padding: 0 10vw;
+    z-index: 10;
+	background: rgba(0,0,0,.5);
+	color: white;
+}
+
+.loginForm form {
+    display: flex; 
+	flex-direction: column;
+    justify-content: space-around;
+    align-items: center;
+}
+
+.loginForm h2 {  
+	color: gold;
+    text-shadow: black 1px 1px 4px;
+	padding: 0 2.5vw 2.5vh;
+	margin-top: 0;
+}
+
+.loginForm label {  
+	font-size: 18px;
+	padding: 0 0 1vh;
+}
+
+.loginForm input { 
+    font-size: 4vh;
+    text-transform: uppercase;
+    background: none;
+    border: 1px solid rgba(255,255,255,.2);
+    width: 9em;
+    text-align: center;
+    outline: 0;
+    padding: 1vh 0;
+    background: rgba(0,0,0,0.3);
+	letter-spacing: .2em;
+    color: white;
+	margin-bottom: 2.5vh;
+}
+
+.loginForm button {
+	opacity: 0;
+    outline: none;
+    font-size: 4vh;
+    text-transform: uppercase;
+    font-weight: bold;
+    font-family: inherit;
+    line-height: 1.2;
+	margin: 0 3vw;
+	display: flex;
+	flex-direction: row-reverse;
+    background: white;
+    color: black;
+    padding: .2em;
+    width: 9em;
+    justify-content: center;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.loginForm button.fadeIn {
+	transition: opacity 1s ease;
+	opacity: 1;
+}
+
+.loginForm button::before { 
+    font-family: FontAwesome; 
+    padding: 0 .2em;
+}
+
+.loginForm ~ * { 
+	filter: blur(20px); 
+}
 .pauseMenu + .topBar * { opacity:  .5; }
 
 .pauseMenu {
@@ -187,6 +271,7 @@ h1 {
     align-items: center;
     z-index: 10;
 	background: rgba(0,0,0,.5);
+	margin-bottom: 2.5vh;
 }
 
 .pauseMenu button.close {
@@ -236,7 +321,10 @@ h1 {
 	flex-grow: 1;
 	display: flex;
 }
- 
+
+#counter_inverse {
+	animation-delay: 2.5s;
+}
 
 .status {
   margin-bottom: 10px;

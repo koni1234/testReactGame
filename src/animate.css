@@ -33,6 +33,11 @@
   animation-duration: .75s;
 }
 
+.animated.zoomScaleIn {
+  -webkit-animation-duration: 2.5s;
+  animation-duration: 2.5s;
+}
+
 @-webkit-keyframes bounce {
   from, 20%, 53%, 80%, to {
     -webkit-animation-timing-function: cubic-bezier(0.215, 0.610, 0.355, 1.000);
@@ -2757,6 +2762,35 @@
 .zoomIn {
   -webkit-animation-name: zoomIn;
   animation-name: zoomIn;
+}
+
+@-webkit-keyframes zoomScaleIn {
+  from {
+    -webkit-transform: scale3d(.7,.7, .7);
+    transform: scale3d(.7, .7, .7);
+  }
+
+  100% {
+    -webkit-transform: scale3d(1.7, 1.7, 1.7);
+    transform: scale3d(1.7, 1.7, 1.7);
+  }
+}
+
+@keyframes zoomScaleIn {
+  from {
+    -webkit-transform: scale3d(.7,.7, .7);
+    transform: scale3d(.7, .7, .7);
+  }
+
+  100% {
+    -webkit-transform: scale3d(1.7, 1.7, 1.7);
+    transform: scale3d(1.7, 1.7, 1.7);
+  }
+}
+
+.zoomScaleIn {
+  -webkit-animation-name: zoomScaleIn;
+  animation-name: zoomScaleIn;
 }
 
 @-webkit-keyframes zoomInDown {
