@@ -27,9 +27,19 @@ class UserPanel extends React.Component {
 			userName: userName
 		});
 	}
+	
+	reset() {
+		localStorage.removeItem('userData');
+		
+		this.setState({
+			tempName: "",
+			userName: ""
+		});
+	}
 
-	componentDidMount() {
+	componentDidMount() { 
 		const userData =  JSON.parse(localStorage.getItem('userData') || '{}');
+		
 		this.setState({
 			userName: userData.userName
 		});

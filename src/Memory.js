@@ -200,8 +200,6 @@ class Board extends React.Component {
 			}
 		}
 		
-		localStorage.removeItem('userData');
-		
 		this.setState({
 			squares: squares.sort(function() { return 0.5 - Math.random() }),
 			squareVisible: "",
@@ -214,6 +212,8 @@ class Board extends React.Component {
 			time: "",
 			points: 0
 		});
+		
+		this.userData.reset();
 	}
 	
 	pauseGame(i) {
@@ -542,6 +542,9 @@ class Board extends React.Component {
 		
 		let output = [];
 		
+		//includo component user con ref x richiamare metodi parent/child
+		output.push(<UserPanel ref={(userData) => { this.userData = userData; }}  />);
+		
 	  	if (winner || looser) {
 			let status;
 			let cssClass;
@@ -569,7 +572,6 @@ class Board extends React.Component {
 			}
 		}
 		
-		output.push(<UserPanel />);
 		
 		if(this.state.selectedGame && gameLevel && gameMode && startTime) {
 			if(pause === true) {
@@ -584,7 +586,7 @@ class Board extends React.Component {
 		}
     
 		return (
-			<div key={0}>
+			<div key="game" className="game">
 				{output}
 			</div>
     	);
@@ -594,7 +596,7 @@ class Board extends React.Component {
 class Game extends React.Component {
   render() {
     return (
-      <div className="game">
+      <div>
           <Board rows={5} cells={6}/>
       </div>
     );

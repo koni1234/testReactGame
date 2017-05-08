@@ -113,14 +113,14 @@ h1 , h2 {
 }
 
 .game {
-	display: flex;
-	flex-direction: row;
+	/*display: flex;
+	flex-direction: row;*/
 	height: 100vh;
 }
-
+/*
 .game > div {
 	flex-grow: 1;
-}
+}*/
 
 .topBar {
 	height: 8vh;
