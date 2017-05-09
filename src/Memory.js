@@ -86,10 +86,12 @@ class Board extends React.Component {
 			time: "",
 			timer: "",
 			points: 0,
-			lastPoints: 0
+			lastPoints: 0,
+			onShuffle: false
 		};
 		
 		this.handleAnimationEnd = this.handleAnimationEnd.bind(this);
+		this.handleShuffleEnd = this.handleShuffleEnd.bind(this);
 	}
 	
     componentDidMount(){
@@ -103,17 +105,26 @@ class Board extends React.Component {
 	
 	componentDidUpdate(){
 		const elm = this.refs.lastPoints;
+		const board = this.refs.gameBoard;
+		const onShuffle = this.state.onShuffle;
 		
 		if(elm!== undefined && elm.className === "") {
 			elm.className = "animated fadeInOut";
 			elm.addEventListener('animationend', this.handleAnimationEnd);
 		}
+		if(onShuffle) {
+			const className = this.state.gameLevel + " animated shuffle game-board";
+			board.className = className;
+			board.addEventListener('animationend', this.handleShuffleEnd);
+		}
+		//shake
     }
 	
 	checkTimer() {
 		const winner = calculateWinner(this.state.squares);
 		const pause = this.state.pause;
 		const selectedGame = this.state.selectedGame;
+		const gameLevel = this.state.gameLevel; 
 		const startTime = this.state.startTime;
 		const mode = this.state.gameMode;
 		const time = this.state.time;
@@ -122,6 +133,13 @@ class Board extends React.Component {
 			let mode = this.state.gameMode;
 			let newTime = ( mode === "time") ? time - 1 : time + 1;
 			this.setState({time: newTime });
+			
+			//shuffle
+			let seconds = 15; //ogni 15 secondi provo a fare shuffle
+			let tryShuffle = ( newTime % seconds === 0 && time !== 0 )  ? true : false;
+			
+			if( newTime % seconds === 0 && time !== 0 ) tryShuffle = true;
+			if( tryShuffle && Math.random() >= 0.5) this.shuffle();
 		}
 	}
 
@@ -176,7 +194,21 @@ class Board extends React.Component {
 		}
 	}
 	
-	handleAnimationEnd(){
+	handleShuffleEnd(e) {
+		const elm = this.refs.gameBoard;
+		const className = this.state.gameLevel + " game-board";
+  		const squares = this.state.squares.slice();
+		
+		elm.removeEventListener('animationend', this.handleShuffleEnd );
+		elm.className = className;
+		
+		this.setState({
+			squares: squares.sort(function() { return 0.5 - Math.random() }),
+			onShuffle: false
+		});
+	}
+	
+	handleAnimationEnd(e){
 		const elm = this.refs.lastPoints;
 		elm.removeEventListener('animationend', this.handleAnimationEnd );
 		elm.className = "";
@@ -213,7 +245,7 @@ class Board extends React.Component {
 			points: 0
 		});
 		
-		this.userData.reset();
+		this.userPanel.reset();
 	}
 	
 	pauseGame(i) {
@@ -269,7 +301,8 @@ class Board extends React.Component {
 			startTime: Date.now(),
 			time: time,
 			points: 0,
-			lastPoints: 0
+			lastPoints: 0,
+			onShuffle: false
 		});
 	}
 	
@@ -279,6 +312,12 @@ class Board extends React.Component {
 			gameLevel: "",
 			gameMode: "",
 			selectedGame: i.game,
+		});
+	}
+	
+	shuffle() {
+		this.setState({
+			onShuffle: true,
 		});
 	}
 	
@@ -377,6 +416,7 @@ class Board extends React.Component {
 			
 	renderBoard() {
 		const rows = this.state.rows;
+		let className = this.state.gameLevel + " game-board";
 		let output = [];
 	  
 		for(let i = 0; i<rows; i++) {
@@ -384,7 +424,7 @@ class Board extends React.Component {
 		}
 	  
 		return (
-			<div key={'game-board'} className={this.state.gameLevel + " game-board"}>
+			<div key={'game-board'} ref="gameBoard" className={className}>
 				{output}
 			</div>
 		);
@@ -543,7 +583,7 @@ class Board extends React.Component {
 		let output = [];
 		
 		//includo component user con ref x richiamare metodi parent/child
-		output.push(<UserPanel ref={(userData) => { this.userData = userData; }}  />);
+		output.push(<UserPanel ref={(userPanel) => { this.userPanel = userPanel; }}  />);
 		
 	  	if (winner || looser) {
 			let status;
