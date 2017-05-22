@@ -198,13 +198,21 @@ class Board extends React.Component {
 		const elm = this.refs.gameBoard;
 		const className = this.state.gameLevel + " game-board";
   		const squares = this.state.squares.slice();
+  		const squareVisible = this.state.squareVisible;
+		
+		if(squareVisible.toString().length) {
+			squares[squareVisible].visible = false;
+			squares[squareVisible].firstView = true;
+		}
 		
 		elm.removeEventListener('animationend', this.handleShuffleEnd );
 		elm.className = className;
 		
 		this.setState({
 			squares: squares.sort(function() { return 0.5 - Math.random() }),
-			onShuffle: false
+			onShuffle: false,
+			squareVisible: "",
+			lastClickedSquare: ""
 		});
 	}
 	

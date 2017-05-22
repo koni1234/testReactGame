@@ -2,6 +2,7 @@
   "name": "test-game",
   "version": "0.1.0",
   "private": true,
+  "homepage": "https://koni1234.github.io/testReactGame",
   "dependencies": {
     "react": "^15.5.3",
     "react-dom": "^15.5.3"
