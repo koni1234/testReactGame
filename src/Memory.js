@@ -87,6 +87,7 @@ class Board extends React.Component {
 			timer: "",
 			points: 0,
 			lastPoints: 0,
+			gameStatus: "",
 			onShuffle: false
 		};
 		
@@ -131,8 +132,18 @@ class Board extends React.Component {
 			
 		if(!pause && selectedGame && startTime && !winner && ( ( mode !== "time" ) || time > 0 )) {
 			let mode = this.state.gameMode;
-			let newTime = ( mode === "time") ? time - 1 : time + 1;
-			this.setState({time: newTime });
+			let newTime = ( mode === "time") ? time - 1 : time + 1; 
+			let looser = ( mode === "time" && newTime < 1 && !winner) ? true : false;
+			
+			if(looser) {
+				this.setState({
+					gameStatus: "lose",
+					time: newTime 
+				});
+			}
+			else {
+				this.setState({time: newTime });
+			}
 			
 			//shuffle
 			let seconds = 15; //ogni 15 secondi provo a fare shuffle
@@ -145,10 +156,12 @@ class Board extends React.Component {
 
 	handleClick(i) {
   		const squares = this.state.squares.slice();
-		const winner = calculateWinner(squares);
+		const gameStatus = this.state.gameStatus;
   		const squareVisible = this.state.squareVisible;
+		let newState = {};
 		
-		if (winner || squareVisible === i || squares[i].visible === true ) {
+		
+		if ( gameStatus === "win" || squareVisible === i || squares[i].visible === true ) {
 			return;
 		}
 		
@@ -159,39 +172,38 @@ class Board extends React.Component {
 			if(!squares[i].firstView) lastPoints += 10;
 			if(!squares[squareVisible].firstView) lastPoints += 10;
 			
-			let point = this.state.points + lastPoints;
+			let points = this.state.points + lastPoints;
 			
 			squares[i].visible = true;
 			squares[i].found = true;
 			squares[i].firstView = true;
 			squares[squareVisible].found = true;
 			squares[squareVisible].firstView = true;
-			this.setState({
-				squares: squares,
-				squareVisible: "",
-				lastClickedSquare: "",
-				points: point,
-				lastPoints: lastPoints
-			});
+			
+			newState.squareVisible= "";
+			newState.lastClickedSquare= "";
+			newState.points= points;
+			newState.lastPoints= lastPoints; 
 		}
 		else if(squareVisible.toString().length) {
 			squares[i].firstView = true;
 			squares[squareVisible].visible = false;
 			squares[squareVisible].firstView = true;
-			this.setState({
-				squares: squares,
-				squareVisible: "",
-				lastClickedSquare: i
-			});
+			
+			newState.squareVisible= "";
+			newState.lastClickedSquare= i; 
 		}
 		else {
 			squares[i].visible = true;
-			this.setState({
-				squares: squares,
-				squareVisible: i,
-				lastClickedSquare: "",
-			});
+			newState.squareVisible= i;
+			newState.lastClickedSquare= "";
 		}
+		
+		const winner = calculateWinner(squares);
+		if(winner) newState.gameStatus= "win";
+		newState.squares= squares;
+			
+		this.setState(newState);
 	}
 	
 	handleShuffleEnd(e) {
@@ -236,6 +248,7 @@ class Board extends React.Component {
 				value: y,
 				visible: false,
 				found: false,
+				firstView: false,
 				data: ""
 			}
 		}
@@ -245,6 +258,7 @@ class Board extends React.Component {
 			squareVisible: "",
 			lastClickedSquare: "",
 			pause: false,
+			gameStatus: "",
 			selectedGame: "",
 			gameLevel: "",
 			gameMode: "",
@@ -304,6 +318,7 @@ class Board extends React.Component {
 			squares: squares.sort(function() { return 0.5 - Math.random() }),
 			rows: rows,
 			cells: cells,
+			gameStatus: "",
 			squareVisible: "",
 			pause: false,
 			startTime: Date.now(),
@@ -421,6 +436,22 @@ class Board extends React.Component {
 			{output}
 		</div>);		
 	}
+
+	renderEndGameMenu() {
+		const winner = this.state.gameStatus === "win" ? true : false;
+		const status = ( winner === true ) ? 'Hai vinto!' : 'Hai perso!';
+		const cssClass = ( winner === true ) ?  "status win animated fadeIn" : "status lose animated fadeIn"; 
+		let output = [];
+				
+		output.push(<div key="endGameMenu" className={cssClass}>
+			<span className="animated infinite pulse" key="endGameMenuStatus">{status}</span>
+			{this.renderScore()}
+			{this.renderButton({type:"play again", game:this.state.selectedGame, className:"continue fa fa-play", })}
+			{this.renderButton({type:"index", className:"continue fa fa-home", })}
+		</div>);
+		
+		return output;
+	}
 			
 	renderBoard() {
 		const rows = this.state.rows;
@@ -529,13 +560,14 @@ class Board extends React.Component {
 	}
 			
 	renderScore() {
+		const gameStatus= this.state.gameStatus;
 		const gameMode = this.state.gameMode;
 		const time = this.state.time;
 		const score = (gameMode === "time") ? this.state.points + ( time * 20 ) : this.state.points;
 		
 		let output = [];
 		
-		if(gameMode === "time") {
+		if(gameMode === "time" && gameStatus === "win") {
 			output.push(<Counter
 				from={time} 
 				units="seconds"
@@ -580,44 +612,20 @@ class Board extends React.Component {
 	}
 	
 	render() {
-		const winner = calculateWinner(this.state.squares);
+		const gameStatus = this.state.gameStatus;
 	  	const pause = this.state.pause;
 		const gameLevel = this.state.gameLevel;
 		const gameMode = this.state.gameMode;
 		const startTime = this.state.startTime;
-		const time = this.state.time;
-		const looser = ( gameMode === "time" && time < 1 && !winner) ? true : false;
+		const time = this.state.time; 
 		
 		let output = [];
 		
 		//includo component user con ref x richiamare metodi parent/child
 		output.push(<UserPanel ref={(userPanel) => { this.userPanel = userPanel; }}  />);
 		
-	  	if (winner || looser) {
-			let status;
-			let cssClass;
-			
-			if(winner) {
-				status = 'Hai vinto!';
-				cssClass = "status win animated fadeIn";
-				
-				output.push(<div key={'0'} className={cssClass}>
-					<span className="animated infinite pulse" key={0}>{status}</span>
-					{this.renderScore()}
-					{this.renderButton({type:"play again", game:this.state.selectedGame, className:"continue fa fa-play", })}
-					{this.renderButton({type:"index", className:"continue fa fa-home", })}
-				</div>);
-			}
-			else {
-				status = 'Hai perso!';
-				cssClass = "status lose animated fadeIn";
-				
-				output.push(<div key={'0'} className={cssClass}>
-					<span className="animated infinite pulse" key={0}>{status}</span>
-					{this.renderButton({type:"play again", game:this.state.selectedGame, className:"continue fa fa-play", })}
-					{this.renderButton({type:"index", className:"continue fa fa-home", })}
-				</div>);
-			}
+	  	if (gameStatus === "win" || gameStatus === "lose") {
+			output.push(this.renderEndGameMenu());
 		}
 		
 		
