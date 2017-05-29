@@ -108,18 +108,36 @@ class Board extends React.Component {
 		const elm = this.refs.lastPoints;
 		const board = this.refs.gameBoard;
 		const onShuffle = this.state.onShuffle;
+		const winner = this.state.gameStatus === "win" ? true : false;
 		
 		if(elm!== undefined && elm.className === "") {
 			elm.className = "animated fadeInOut";
 			elm.addEventListener('animationend', this.handleAnimationEnd);
 		}
+		
 		if(onShuffle) {
 			const className = this.state.gameLevel + " animated shuffle game-board";
 			board.className = className;
 			board.addEventListener('animationend', this.handleShuffleEnd);
 		}
-		//shake
-    }
+
+		if(winner) {
+			const userName = this.userPanel.state.userName;
+			const selectedGame = this.state.selectedGame;
+			const gameLevel = this.state.gameLevel; 
+			const gameMode = this.state.gameMode;
+			const time = this.state.time;
+			const score = (gameMode === "time") ? this.state.points + ( time * 20 ) : this.state.points;
+			//console.log('componentDidUpdate winnnnnn')
+			this.userPanel.saveLog({
+				userName:userName,
+				selectedGame: selectedGame.name,
+				gameLevel: gameLevel,
+				gameMode: gameMode,
+				points: score
+			});
+		}
+	}
 	
 	checkTimer() {
 		const winner = calculateWinner(this.state.squares);

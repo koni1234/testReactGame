@@ -36,6 +36,18 @@ class UserPanel extends React.Component {
 			userName: ""
 		});
 	}
+	
+	saveLog(log) {
+		let logs =  JSON.parse(localStorage.getItem('userLogs') || '[]');
+	
+		if(typeof log === "object") logs.push(log);
+		
+    	localStorage.setItem('userLogs', JSON.stringify(logs));
+		
+		this.setState({
+			userLogs: logs
+		});
+	}
 
 	componentDidMount() { 
 		const userData =  JSON.parse(localStorage.getItem('userData') || '{}');
