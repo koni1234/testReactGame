@@ -108,7 +108,6 @@ class Board extends React.Component {
 		const elm = this.refs.lastPoints;
 		const board = this.refs.gameBoard;
 		const onShuffle = this.state.onShuffle;
-		const winner = this.state.gameStatus === "win" ? true : false;
 		
 		if(elm!== undefined && elm.className === "") {
 			elm.className = "animated fadeInOut";
@@ -120,30 +119,12 @@ class Board extends React.Component {
 			board.className = className;
 			board.addEventListener('animationend', this.handleShuffleEnd);
 		}
-
-		if(winner) {
-			const userName = this.userPanel.state.userName;
-			const selectedGame = this.state.selectedGame;
-			const gameLevel = this.state.gameLevel; 
-			const gameMode = this.state.gameMode;
-			const time = this.state.time;
-			const score = (gameMode === "time") ? this.state.points + ( time * 20 ) : this.state.points;
-			//console.log('componentDidUpdate winnnnnn')
-			this.userPanel.saveLog({
-				userName:userName,
-				selectedGame: selectedGame.name,
-				gameLevel: gameLevel,
-				gameMode: gameMode,
-				points: score
-			});
-		}
 	}
 	
 	checkTimer() {
 		const winner = calculateWinner(this.state.squares);
 		const pause = this.state.pause;
-		const selectedGame = this.state.selectedGame;
-		const gameLevel = this.state.gameLevel; 
+		const selectedGame = this.state.selectedGame; 
 		const startTime = this.state.startTime;
 		const mode = this.state.gameMode;
 		const time = this.state.time;
@@ -218,10 +199,15 @@ class Board extends React.Component {
 		}
 		
 		const winner = calculateWinner(squares);
-		if(winner) newState.gameStatus= "win";
+		let endGameCallback = () => {};
+		
+		if(winner) {
+			newState.gameStatus= "win";	
+			endGameCallback = () => { this.saveGame();};
+		} 
+		
 		newState.squares= squares;
-			
-		this.setState(newState);
+		this.setState(newState , endGameCallback);
 	}
 	
 	handleShuffleEnd(e) {
@@ -286,6 +272,23 @@ class Board extends React.Component {
 		});
 		
 		this.userPanel.reset();
+	}
+	
+	saveGame() {
+		const userName = this.userPanel.state.userName;
+		const selectedGame = this.state.selectedGame;
+		const gameLevel = this.state.gameLevel; 
+		const gameMode = this.state.gameMode;
+		const time = this.state.time;
+		const score = (gameMode === "time") ? this.state.points + ( time * 20 ) : this.state.points;
+	
+		this.userPanel.saveLog({
+			userName:userName,
+			selectedGame: selectedGame.name,
+			gameLevel: gameLevel,
+			gameMode: gameMode,
+			points: score
+		});
 	}
 	
 	pauseGame(i) {
@@ -635,7 +638,6 @@ class Board extends React.Component {
 		const gameLevel = this.state.gameLevel;
 		const gameMode = this.state.gameMode;
 		const startTime = this.state.startTime;
-		const time = this.state.time; 
 		
 		let output = [];
 		
