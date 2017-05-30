@@ -18,6 +18,7 @@ class Counter extends React.Component {
 			timer: 0,
 			loops: 0,
 			loopCounter: 0,
+			onComplete: (props.onComplete) ? () => props.onComplete() : () => {},
 			value: (props.from) ? props.from : 0
 		};
 	}
@@ -53,7 +54,10 @@ class Counter extends React.Component {
 		
 		console.log('update contatore');
 		
-		if (loopCounter >= loops) this.stopCounter();
+		if (loopCounter >= loops) {
+			this.stopCounter();
+			this.state.onComplete();
+		}
 		
 		this.setState({
 			loopCounter: loopCounter,

@@ -88,11 +88,13 @@ class Board extends React.Component {
 			points: 0,
 			lastPoints: 0,
 			gameStatus: "",
-			onShuffle: false
+			onShuffle: false,
+			rankingVisibility: false
 		};
 		
 		this.handleAnimationEnd = this.handleAnimationEnd.bind(this);
 		this.handleShuffleEnd = this.handleShuffleEnd.bind(this);
+		this.setRankingVisibility = this.setRankingVisibility.bind(this);
 	}
 	
     componentDidMount(){
@@ -268,7 +270,8 @@ class Board extends React.Component {
 			gameMode: "",
 			startTime: "",
 			time: "",
-			points: 0
+			points: 0,
+			rankingVisibility: false
 		});
 		
 		this.userPanel.reset();
@@ -341,6 +344,7 @@ class Board extends React.Component {
 			cells: cells,
 			gameStatus: "",
 			squareVisible: "",
+			rankingVisibility: false,
 			pause: false,
 			startTime: Date.now(),
 			time: time,
@@ -579,6 +583,20 @@ class Board extends React.Component {
 			onClick={() => this.pauseGame(i)}
 		/>;
 	}
+		
+	setRankingVisibility() {
+		this.setState({rankingVisibility: true});
+	}	
+		
+	renderRanking() {
+		let output = this.userPanel.state.userLogs ? this.userPanel.state.userLogs : [];
+    
+		return (
+			<div key="ranking" className="ranking">
+				{JSON.stringify(output)}
+			</div>
+    	);
+	}
 			
 	renderScore() {
 		const gameStatus= this.state.gameStatus;
@@ -607,6 +625,7 @@ class Board extends React.Component {
 						units="points"
 						duration={2500}
 						refreshInterval={10}
+						onComplete={this.setRankingVisibility}
 						/>);
 					 
 		return output;
@@ -637,6 +656,7 @@ class Board extends React.Component {
 	  	const pause = this.state.pause;
 		const gameLevel = this.state.gameLevel;
 		const gameMode = this.state.gameMode;
+		const rankingVisibility = this.state.rankingVisibility;
 		const startTime = this.state.startTime;
 		
 		let output = [];
@@ -647,7 +667,10 @@ class Board extends React.Component {
 	  	if (gameStatus === "win" || gameStatus === "lose") {
 			output.push(this.renderEndGameMenu());
 		}
-		
+			
+		if(rankingVisibility) {
+			output.push(this.renderRanking());
+		}
 		
 		if(this.state.selectedGame && gameLevel && gameMode && startTime) {
 			if(pause === true) {
