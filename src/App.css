@@ -150,14 +150,14 @@ h1 , h2 {
 	font-size: 5vh;
 }
 
-.points {
+.topBar .points {
     justify-content: flex-end;
     align-items: center;
     flex-grow: 1;
     display: flex;
 }
 
-.points span {
+.topBar .points span {
 	font-size: 4vh;
 	color: gold;
 	padding: 0 2.5vw;
@@ -350,7 +350,7 @@ h1 , h2 {
 	background: rgba(0,0,0,.5);
 }
 
-.status span {
+.status > span {
 	padding: 0 .5em;
 	width: 100%;
 	font-size: 40px;
@@ -358,7 +358,7 @@ h1 , h2 {
     text-shadow: black 1px 1px 4px;
 }
 
-.status span.counter {
+.status > span.counter {
 	font-size: 30px;
 }
 
@@ -469,6 +469,42 @@ h1 , h2 {
 	transition: opacity 1s 0s ease;
 	opacity: 1;
 }
+
+.ranking {
+	display: flex;
+    margin: 0 auto;
+    flex-direction: column;
+    padding: 0;
+    width: 80%;
+}
+
+.ranking li {
+	display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.ranking li:nth-child(1n +4) {
+	display: none;
+}
+
+.ranking span {
+	padding: 0;
+	font-size: 28px;
+    color: white;
+    text-shadow: black 1px 1px 4px;
+	text-transform: uppercase;
+}
+.ranking span.username {
+    flex-grow: 1;
+    padding: 0 .5em;
+	text-align: left;
+}
+
+
+
+
+
 
 .kbd-navigation .square:focus {
   background: #ddd;

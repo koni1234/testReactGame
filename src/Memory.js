@@ -466,16 +466,18 @@ class Board extends React.Component {
 		const winner = this.state.gameStatus === "win" ? true : false;
 		const status = ( winner === true ) ? 'Hai vinto!' : 'Hai perso!';
 		const cssClass = ( winner === true ) ?  "status win animated fadeIn" : "status lose animated fadeIn"; 
+		const rankingVisibility = this.state.rankingVisibility;
 		let output = [];
 				
-		output.push(<div key="endGameMenu" className={cssClass}>
-			<span className="animated infinite pulse" key="endGameMenuStatus">{status}</span>
-			{this.renderScore()}
-			{this.renderButton({type:"play again", game:this.state.selectedGame, className:"continue fa fa-play", })}
-			{this.renderButton({type:"index", className:"continue fa fa-home", })}
-		</div>);
+		output.push(<span className="animated infinite pulse" key="endGameMenuStatus">{status}</span>);
+		output.push(this.renderScore());
 		
-		return output;
+		if(rankingVisibility) output.push(this.renderRanking());
+			
+		output.push(this.renderButton({type:"play again", game:this.state.selectedGame, className:"continue fa fa-play", }));
+		output.push(this.renderButton({type:"index", className:"continue fa fa-home", }));
+		
+		return (<div key="endGameMenu" className={cssClass}>{output}</div>);
 	}
 			
 	renderBoard() {
@@ -589,12 +591,38 @@ class Board extends React.Component {
 	}	
 		
 	renderRanking() {
-		let output = this.userPanel.state.userLogs ? this.userPanel.state.userLogs : [];
+		const gameLevel = this.state.gameLevel; 
+		const selectedGame = this.state.selectedGame.name;
+		const gameMode = this.state.gameMode;
+		let logs = this.userPanel.state.userLogs ? this.userPanel.state.userLogs : [];
+		let output = [];
+		let counter = 0;
+		/*userName:userName,
+			selectedGame: selectedGame.name,
+			gameLevel: gameLevel,
+			gameMode: gameMode,
+			points: score*/
+		logs = logs.filter(function(obj) { 
+		   if(obj.selectedGame === selectedGame && obj.gameMode === gameMode && obj.gameLevel === gameLevel ) return obj;
+		});
+		
+		logs = logs.sort(function (a, b) {
+		  return b.points - a.points;
+		});
+		
+		logs.forEach(game => {
+		   counter++
+		   output.push(<li>
+					<span className="rank">{counter}</span>
+					<span className="username">{game.userName}</span>
+					<span className="points">{game.points}</span>
+			</li>);
+		})
     
 		return (
-			<div key="ranking" className="ranking">
-				{JSON.stringify(output)}
-			</div>
+			<ol key="ranking" className="ranking">
+				{output}
+			</ol>
     	);
 	}
 			
@@ -656,7 +684,6 @@ class Board extends React.Component {
 	  	const pause = this.state.pause;
 		const gameLevel = this.state.gameLevel;
 		const gameMode = this.state.gameMode;
-		const rankingVisibility = this.state.rankingVisibility;
 		const startTime = this.state.startTime;
 		
 		let output = [];
@@ -666,10 +693,6 @@ class Board extends React.Component {
 		
 	  	if (gameStatus === "win" || gameStatus === "lose") {
 			output.push(this.renderEndGameMenu());
-		}
-			
-		if(rankingVisibility) {
-			output.push(this.renderRanking());
 		}
 		
 		if(this.state.selectedGame && gameLevel && gameMode && startTime) {
